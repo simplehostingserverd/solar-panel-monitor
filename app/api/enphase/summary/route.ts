@@ -1,22 +1,19 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { EnphaseAPI } from "@/lib/api/enphase"
+import { createEnphaseAPI } from "@/lib/api/enphase-helper"
 
 export async function GET() {
   try {
     const session = await auth()
 
-    if (!session?.accessToken) {
+    if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       )
     }
 
-    const api = new EnphaseAPI(
-      process.env.ENPHASE_API_KEY!,
-      session.accessToken
-    )
+    const api = createEnphaseAPI()
 
     const summary = await api.getSystemSummary(process.env.ENPHASE_SITE_ID!)
 

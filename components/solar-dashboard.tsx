@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductionChart } from "@/components/production-chart"
 import { ConsumptionChart } from "@/components/consumption-chart"
-import { Zap, Activity, Sun, TrendingUp, Building2, Sparkles } from "lucide-react"
+import { Zap, Activity, Sun, TrendingUp, Building2, Sparkles, AlertCircle, Wifi, WifiOff } from "lucide-react"
 import { motion } from "framer-motion"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 async function fetchSummary() {
   const res = await fetch('/api/enphase/summary')
@@ -31,23 +32,29 @@ async function fetchConsumption() {
 }
 
 export function SolarDashboard() {
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: summary, isLoading: summaryLoading, error: summaryError } = useQuery({
     queryKey: ['summary'],
     queryFn: fetchSummary,
     refetchInterval: 5 * 60 * 1000,
+    retry: 2,
   })
 
-  const { data: production, isLoading: productionLoading } = useQuery({
+  const { data: production, isLoading: productionLoading, error: productionError } = useQuery({
     queryKey: ['production'],
     queryFn: fetchProduction,
     refetchInterval: 15 * 60 * 1000,
+    retry: 2,
   })
 
-  const { data: consumption, isLoading: consumptionLoading } = useQuery({
+  const { data: consumption, isLoading: consumptionLoading, error: consumptionError } = useQuery({
     queryKey: ['consumption'],
     queryFn: fetchConsumption,
     refetchInterval: 15 * 60 * 1000,
+    retry: 2,
   })
+
+  // Check if there are any errors
+  const hasErrors = summaryError || productionError || consumptionError
 
   const formatPower = (watts: number) => {
     if (watts >= 1000) {
@@ -131,18 +138,70 @@ export function SolarDashboard() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-right"
+            className="flex flex-col items-end gap-3"
           >
-            <div className="text-sm font-medium text-blue-100">Last Updated</div>
-            <div className="text-lg font-semibold">
-              {new Date().toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
+            <div className="text-right">
+              <div className="text-sm font-medium text-blue-100">Last Updated</div>
+              <div className="text-lg font-semibold">
+                {new Date().toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+            </div>
+
+            {/* Status Indicator */}
+            <div className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 backdrop-blur-sm">
+              <motion.div
+                animate={hasErrors ? {
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 1, 0.5]
+                } : {
+                  scale: [1, 1.1, 1],
+                  opacity: [0.8, 1, 0.8]
+                }}
+                transition={{
+                  duration: hasErrors ? 1 : 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className={`h-3 w-3 rounded-full ${
+                  hasErrors
+                    ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'
+                    : 'bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)]'
+                }`}
+              />
+              <span className="text-sm font-medium">
+                {hasErrors ? 'Offline' : 'Online'}
+              </span>
             </div>
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Error Alert Banner */}
+      {hasErrors && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Alert variant="destructive" className="border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+            <WifiOff className="h-4 w-4 !text-amber-600 dark:!text-amber-400" />
+            <AlertTitle className="text-amber-900 dark:text-amber-100">Connection Issue Detected</AlertTitle>
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              Unable to connect to Enphase inverters. Please ensure:
+              <ul className="mt-2 list-disc list-inside space-y-1">
+                <li>Inverters are connected to WiFi network</li>
+                <li>Inverters are powered on and online</li>
+                <li>Your Enphase account credentials are correct</li>
+                <li>Site ID (1569479) is correct</li>
+              </ul>
+              <p className="mt-2 text-sm">The dashboard will automatically retry every 5 minutes.</p>
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       {/* Animated Stats Cards */}
       <motion.div

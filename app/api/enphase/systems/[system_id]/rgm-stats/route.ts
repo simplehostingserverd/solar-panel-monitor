@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { system_id: string } }
+) {
   try {
     const session = await auth()
 
@@ -17,19 +20,22 @@ export async function GET(request: NextRequest) {
     const startAt = searchParams.get('start_at')
     const endAt = searchParams.get('end_at')
 
-    const api = createEnphaseAPI()
+    const api = createEnphaseAPI(
+      process.env.ENPHASE_API_KEY!,
+      process.env.ENPHASE_ACCESS_TOKEN!
+    )
 
-    const production = await api.getProductionData(
-      process.env.ENPHASE_SITE_ID!,
+    const stats = await api.getRgmStats(
+      params.system_id,
       startAt ? parseInt(startAt) : undefined,
       endAt ? parseInt(endAt) : undefined
     )
 
-    return NextResponse.json(production)
+    return NextResponse.json(stats)
   } catch (error: any) {
-    console.error("Production API error:", error.response?.data || error.message)
+    console.error("RGM stats API error:", error.response?.data || error.message)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch production data" },
+      { error: error.response?.data || "Failed to fetch RGM stats" },
       { status: error.response?.status || 500 }
     )
   }

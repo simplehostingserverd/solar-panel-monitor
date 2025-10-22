@@ -14,22 +14,23 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
-    const startAt = searchParams.get('start_at')
-    const endAt = searchParams.get('end_at')
+    const page = searchParams.get('page')
+    const size = searchParams.get('size')
+    const sortBy = searchParams.get('sort_by')
 
     const api = createEnphaseAPI()
 
-    const production = await api.getProductionData(
-      process.env.ENPHASE_SITE_ID!,
-      startAt ? parseInt(startAt) : undefined,
-      endAt ? parseInt(endAt) : undefined
+    const systems = await api.getSystems(
+      page ? parseInt(page) : undefined,
+      size ? parseInt(size) : undefined,
+      sortBy || undefined
     )
 
-    return NextResponse.json(production)
+    return NextResponse.json(systems)
   } catch (error: any) {
-    console.error("Production API error:", error.response?.data || error.message)
+    console.error("Systems API error:", error.response?.data || error.message)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch production data" },
+      { error: error.response?.data || "Failed to fetch systems" },
       { status: error.response?.status || 500 }
     )
   }

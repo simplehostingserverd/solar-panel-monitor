@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { EnphaseAPI } from "@/lib/api/enphase"
+import { createEnphaseAPI } from "@/lib/api/enphase-helper"
 
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.accessToken) {
+    if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
     const startAt = searchParams.get('start_at')
     const endAt = searchParams.get('end_at')
 
-    const api = new EnphaseAPI(
-      process.env.ENPHASE_API_KEY!,
-      session.accessToken
-    )
+    const api = createEnphaseAPI()
 
     const consumption = await api.getConsumptionData(
       process.env.ENPHASE_SITE_ID!,
