@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  solar-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - ENPHASE_CLIENT_ID=${ENPHASE_CLIENT_ID}
+      - ENPHASE_CLIENT_SECRET=${ENPHASE_CLIENT_SECRET}
+      - ENPHASE_API_KEY=${ENPHASE_API_KEY}
+      - ENPHASE_SITE_ID=${ENPHASE_SITE_ID}
+      - NEXT_PUBLIC_ENPHASE_CLIENT_ID=${ENPHASE_CLIENT_ID}
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./public:/app/public:ro
