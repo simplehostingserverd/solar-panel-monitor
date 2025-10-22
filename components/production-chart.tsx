@@ -49,7 +49,7 @@ export function ProductionChart({ data }: ProductionChartProps) {
                         Power
                       </span>
                       <span className="font-bold text-muted-foreground">
-                        {payload[0].value?.toFixed(2)} kW
+                        {Number(payload[0].value).toFixed(2)} kW
                       </span>
                     </div>
                     <div className="flex flex-col">
@@ -57,7 +57,7 @@ export function ProductionChart({ data }: ProductionChartProps) {
                         Energy
                       </span>
                       <span className="font-bold text-muted-foreground">
-                        {payload[1]?.value?.toFixed(2)} kWh
+                        {Number(payload[1]?.value).toFixed(2)} kWh
                       </span>
                     </div>
                   </div>

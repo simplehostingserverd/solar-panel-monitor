@@ -46,7 +46,7 @@ export function ConsumptionChart({ data }: ConsumptionChartProps) {
                       Energy Consumed
                     </span>
                     <span className="font-bold text-muted-foreground">
-                      {payload[0].value?.toFixed(2)} kWh
+                      {Number(payload[0].value).toFixed(2)} kWh
                     </span>
                   </div>
                 </div>
