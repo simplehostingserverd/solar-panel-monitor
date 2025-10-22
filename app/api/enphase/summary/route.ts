@@ -1,11 +1,10 @@
-import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { EnphaseAPI } from "@/lib/api/enphase"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session?.accessToken) {
       return NextResponse.json(

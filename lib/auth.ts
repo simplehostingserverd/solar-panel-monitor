@@ -1,9 +1,9 @@
-import { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: "Enphase",
       credentials: {
         code: { label: "Authorization Code", type: "text" }
@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
               },
               body: new URLSearchParams({
                 grant_type: "authorization_code",
-                code: credentials.code,
+                code: credentials.code as string,
                 client_id: process.env.ENPHASE_CLIENT_ID!,
                 client_secret: process.env.ENPHASE_CLIENT_SECRET!,
                 redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/enphase`,
@@ -54,9 +54,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.accessToken
-        token.refreshToken = user.refreshToken
-        token.expiresAt = user.expiresAt
+        token.accessToken = (user as any).accessToken
+        token.refreshToken = (user as any).refreshToken
+        token.expiresAt = (user as any).expiresAt
       }
 
       if (Date.now() < (token.expiresAt as number)) {
@@ -66,15 +66,15 @@ export const authOptions: NextAuthOptions = {
       return refreshAccessToken(token)
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string
-      session.error = token.error as string | undefined
+      (session as any).accessToken = token.accessToken as string
+      ;(session as any).error = token.error as string | undefined
       return session
     },
   },
   pages: {
     signIn: "/login",
   },
-}
+})
 
 async function refreshAccessToken(token: any) {
   try {

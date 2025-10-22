@@ -15,8 +15,16 @@ interface ConsumptionChartProps {
 export function ConsumptionChart({ data }: ConsumptionChartProps) {
   const chartData = data?.intervals?.map((interval) => ({
     time: format(new Date(interval.end_at * 1000), 'HH:mm'),
-    energy: interval.wh_del / 1000,
+    energy: interval.wh_del, // Keep raw watt-hours for free tier
   })) || []
+
+  // Helper to format energy values (auto-convert to kWh if large enough)
+  const formatEnergy = (value: number) => {
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(2)} kWh`
+    }
+    return `${value.toFixed(0)} Wh`
+  }
 
   return (
     <ResponsiveContainer width="100%" height={350}>
@@ -34,7 +42,7 @@ export function ConsumptionChart({ data }: ConsumptionChartProps) {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value.toFixed(1)} kWh`}
+          tickFormatter={formatEnergy}
         />
         <Tooltip
           content={({ active, payload }) => {
@@ -46,7 +54,7 @@ export function ConsumptionChart({ data }: ConsumptionChartProps) {
                       Energy Consumed
                     </span>
                     <span className="font-bold text-muted-foreground">
-                      {Number(payload[0].value).toFixed(2)} kWh
+                      {formatEnergy(Number(payload[0].value))}
                     </span>
                   </div>
                 </div>
