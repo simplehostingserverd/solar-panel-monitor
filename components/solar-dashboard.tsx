@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductionChart } from "@/components/production-chart"
 import { ConsumptionChart } from "@/components/consumption-chart"
-import { Zap, Activity, Sun, TrendingUp, Building2, Sparkles, AlertCircle, Wifi, WifiOff } from "lucide-react"
+import { Zap, Activity, Sun, TrendingUp, Building2, Sparkles, WifiOff } from "lucide-react"
 import { motion } from "framer-motion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 

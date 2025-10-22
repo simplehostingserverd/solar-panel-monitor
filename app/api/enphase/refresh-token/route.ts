@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { isAxiosError } from "@/lib/utils"
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,11 +56,12 @@ export async function POST(request: NextRequest) {
       refresh_token: tokens.refresh_token,
       expires_in: tokens.expires_in,
     })
-  } catch (error: any) {
-    console.error("Token refresh error:", error)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Token refresh error"
+    console.error("Token refresh error:", errorMessage)
     return NextResponse.json(
-      { error: error.message || "Failed to refresh token" },
-      { status: 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to refresh token" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

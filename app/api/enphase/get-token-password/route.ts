@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { isAxiosError } from "@/lib/utils"
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,11 +67,12 @@ export async function POST(request: NextRequest) {
       enl_uid: tokens.enl_uid,
       auto_saved: true,
     })
-  } catch (error: any) {
-    console.error("Token exchange error:", error)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Token exchange error"
+    console.error("Token exchange error:", errorMessage)
     return NextResponse.json(
-      { error: error.message || "Failed to exchange token" },
-      { status: 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to exchange token" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

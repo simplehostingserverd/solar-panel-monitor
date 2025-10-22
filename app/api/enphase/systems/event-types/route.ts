@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,11 +27,12 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json(eventTypes)
-  } catch (error: any) {
-    console.error("Event Types API error:", error.response?.data || error.message)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Event Types API error"
+    console.error("Event Types API error:", errorMessage)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch event types" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to fetch event types" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

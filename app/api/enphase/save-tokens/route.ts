@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { writeFile, readFile } from "fs/promises"
 import path from "path"
+import { isAxiosError } from "@/lib/utils"
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,11 +37,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "Tokens saved to .env file successfully. Please restart your dev server for changes to take effect.",
     })
-  } catch (error: any) {
-    console.error("Failed to save tokens:", error)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Failed to save tokens"
+    console.error("Failed to save tokens:", errorMessage)
     return NextResponse.json(
-      { error: error.message || "Failed to save tokens to .env file" },
-      { status: 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to save tokens to .env file" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

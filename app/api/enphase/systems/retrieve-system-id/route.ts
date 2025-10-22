@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,11 +32,12 @@ export async function GET(request: NextRequest) {
     const systemId = await api.getSystemIdBySerial(serialNum)
 
     return NextResponse.json({ system_id: systemId })
-  } catch (error: any) {
-    console.error("System ID retrieval API error:", error.response?.data || error.message)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "System ID retrieval API error"
+    console.error("System ID retrieval API error:", errorMessage)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to retrieve system ID" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to retrieve system ID" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

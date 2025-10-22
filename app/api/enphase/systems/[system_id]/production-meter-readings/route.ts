@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(
   request: NextRequest,
@@ -30,11 +31,12 @@ export async function GET(
     )
 
     return NextResponse.json(readings)
-  } catch (error: any) {
-    console.error("Production meter readings API error:", error.response?.data || error.message)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Production meter readings API error"
+    console.error("Production meter readings API error:", errorMessage)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch production meter readings" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to fetch production meter readings" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

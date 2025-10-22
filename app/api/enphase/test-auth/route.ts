@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET() {
   try {
@@ -58,11 +59,12 @@ export async function GET() {
           status: summary.status,
         }
       })
-    } catch (apiError: any) {
+    } catch (apiError) {
+      const errorMessage = isAxiosError(apiError) ? (apiError.response?.data || apiError.message) : "API call failed"
       return NextResponse.json({
         status: "error",
         message: "API call failed. Token may be invalid or expired.",
-        error: apiError.response?.data || apiError.message,
+        error: errorMessage,
         config: {
           hasApiKey,
           hasAccessToken,
@@ -74,11 +76,12 @@ export async function GET() {
         suggestion: "Visit /get-token to get new tokens, or try /api/enphase/refresh-token to refresh your existing token."
       }, { status: 401 })
     }
-  } catch (error: any) {
-    console.error("Test auth error:", error)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Test auth error"
+    console.error("Test auth error:", errorMessage)
     return NextResponse.json(
-      { error: error.message || "Failed to test authentication" },
-      { status: 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to test authentication" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

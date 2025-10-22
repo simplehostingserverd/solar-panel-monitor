@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,11 +28,12 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json(systems)
-  } catch (error: any) {
-    console.error("Systems API error:", error.response?.data || error.message)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Systems API error"
+    console.error("Systems API error:", errorMessage)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch systems" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to fetch systems" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

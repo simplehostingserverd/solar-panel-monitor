@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert } from "@/components/ui/alert"
@@ -25,14 +25,6 @@ interface System {
   reference?: string
 }
 
-interface SystemsResponse {
-  total: number
-  current_page: number
-  size: number
-  count: number
-  systems: System[]
-}
-
 function CheckSystemsContent() {
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(false)
@@ -52,8 +44,8 @@ function CheckSystemsContent() {
         setSystems(data.systems || [])
         setFetched(true)
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
@@ -80,7 +72,7 @@ function CheckSystemsContent() {
                   <p>Click the button below to check what systems you have access to.</p>
                   <p className="text-sm mt-2 text-muted-foreground">
                     Note: You need to have valid access tokens in your .env file.
-                    If you don't have tokens yet, visit <a href="/get-token" className="underline">/get-token</a> first.
+                    If you don&apos;t have tokens yet, visit <a href="/get-token" className="underline">/get-token</a> first.
                   </p>
                 </Alert>
                 <Button onClick={fetchSystems} className="w-full">
@@ -117,10 +109,10 @@ function CheckSystemsContent() {
                   <Alert>
                     <p className="font-semibold">No systems found</p>
                     <p className="text-sm mt-2">
-                      This means your Enphase account doesn't own any systems or doesn't have API access to any systems.
+                      This means your Enphase account doesn&apos;t own any systems or doesn&apos;t have API access to any systems.
                     </p>
                     <p className="text-sm mt-2">
-                      To get API access to "Ozanam 210 Family Unit" or any other system:
+                      To get API access to &quot;Ozanam 210 Family Unit&quot; or any other system:
                     </p>
                     <ol className="list-decimal list-inside text-sm mt-2 space-y-1">
                       <li>Contact the system owner</li>

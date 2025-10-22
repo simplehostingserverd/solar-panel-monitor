@@ -274,15 +274,12 @@ export class EnphaseAPI {
   private async makeRequest<T>(requestFn: () => Promise<T>): Promise<T> {
     try {
       return await requestFn()
-    } catch (error: any) {
+    } catch (error) {
       // If we get a 401, try to refresh the token and retry once
-      if (error.response?.status === 401 && this.refreshToken) {
-        try {
-          await this.refreshAccessToken()
-          return await requestFn()
-        } catch (refreshError) {
-          throw refreshError
-        }
+      if (error && typeof error === 'object' && 'response' in error &&
+          (error as { response?: { status?: number } }).response?.status === 401 && this.refreshToken) {
+        await this.refreshAccessToken()
+        return await requestFn()
       }
       throw error
     }
@@ -301,7 +298,7 @@ export class EnphaseAPI {
     startAt?: number,
     endAt?: number
   ): Promise<ProductionData> {
-    const params: any = {}
+    const params: Record<string, number> = {}
     if (startAt) params.start_at = startAt
     if (endAt) params.end_at = endAt
 
@@ -320,7 +317,7 @@ export class EnphaseAPI {
     startAt?: number,
     endAt?: number
   ): Promise<ConsumptionData> {
-    const params: any = {}
+    const params: Record<string, number> = {}
     if (startAt) params.start_at = startAt
     if (endAt) params.end_at = endAt
 
@@ -336,7 +333,7 @@ export class EnphaseAPI {
 
   // System Details methods
   async getSystems(page?: number, size?: number, sortBy?: string): Promise<SystemsListResponse> {
-    const params: any = {}
+    const params: Record<string, number | string> = {}
     if (page) params.page = page
     if (size) params.size = size
     if (sortBy) params.sort_by = sortBy
@@ -401,7 +398,7 @@ export class EnphaseAPI {
     startTime: number,
     endTime?: number
   ): Promise<EventsResponse> {
-    const params: any = { start_time: startTime }
+    const params: Record<string, number> = { start_time: startTime }
     if (endTime) params.end_time = endTime
 
     const response = await axios.get(
@@ -420,7 +417,7 @@ export class EnphaseAPI {
     endTime?: number,
     cleared?: boolean
   ): Promise<AlarmsResponse> {
-    const params: any = { start_time: startTime }
+    const params: Record<string, number | boolean> = { start_time: startTime }
     if (endTime) params.end_time = endTime
     if (cleared !== undefined) params.cleared = cleared
 
@@ -435,7 +432,7 @@ export class EnphaseAPI {
   }
 
   async getEventTypes(eventTypeId?: number): Promise<EventTypesResponse> {
-    const params: any = {}
+    const params: Record<string, number> = {}
     if (eventTypeId) params.event_type_id = eventTypeId
 
     const response = await axios.get(
@@ -453,7 +450,7 @@ export class EnphaseAPI {
     systemId: string,
     endAt?: number
   ): Promise<ProductionMeterReadingsResponse> {
-    const params: any = {}
+    const params: Record<string, number> = {}
     if (endAt) params.end_at = endAt
 
     const response = await axios.get(
@@ -471,7 +468,7 @@ export class EnphaseAPI {
     startAt?: number,
     endAt?: number
   ): Promise<RgmStats> {
-    const params: any = {}
+    const params: Record<string, number> = {}
     if (startAt) params.start_at = startAt
     if (endAt) params.end_at = endAt
 
@@ -491,7 +488,7 @@ export class EnphaseAPI {
     endDate?: string,
     production?: string
   ): Promise<EnergyLifetimeResponse> {
-    const params: any = {}
+    const params: Record<string, string> = {}
     if (startDate) params.start_date = startDate
     if (endDate) params.end_date = endDate
     if (production) params.production = production
@@ -512,7 +509,7 @@ export class EnphaseAPI {
     page?: number,
     size?: number
   ): Promise<InvertersSummaryResponse> {
-    const params: any = {}
+    const params: Record<string, string | number> = {}
     if (siteId) params.site_id = siteId
     if (envoySerialNumber) params.envoy_serial_number = envoySerialNumber
     if (page) params.page = page
@@ -534,7 +531,7 @@ export class EnphaseAPI {
     startDate?: string,
     endDate?: string
   ): Promise<LifetimeEnergyResponse> {
-    const params: any = {}
+    const params: Record<string, string> = {}
     if (startDate) params.start_date = startDate
     if (endDate) params.end_date = endDate
 
@@ -553,7 +550,7 @@ export class EnphaseAPI {
     startDate?: string,
     endDate?: string
   ): Promise<LifetimeEnergyResponse> {
-    const params: any = {}
+    const params: Record<string, string> = {}
     if (startDate) params.start_date = startDate
     if (endDate) params.end_date = endDate
 
@@ -572,7 +569,7 @@ export class EnphaseAPI {
     startDate?: string,
     endDate?: string
   ): Promise<LifetimeEnergyResponse> {
-    const params: any = {}
+    const params: Record<string, string> = {}
     if (startDate) params.start_date = startDate
     if (endDate) params.end_date = endDate
 
@@ -591,7 +588,7 @@ export class EnphaseAPI {
     startDate?: string,
     endDate?: string
   ): Promise<LifetimeEnergyResponse> {
-    const params: any = {}
+    const params: Record<string, string> = {}
     if (startDate) params.start_date = startDate
     if (endDate) params.end_date = endDate
 

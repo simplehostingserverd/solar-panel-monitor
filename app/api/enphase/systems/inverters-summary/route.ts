@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,11 +40,12 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json(summary)
-  } catch (error: any) {
-    console.error("Inverters summary API error:", error.response?.data || error.message)
+  } catch (error) {
+    const errorMessage = isAxiosError(error) ? (error.response?.data || error.message) : "Inverters summary API error"
+    console.error("Inverters summary API error:", errorMessage)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch inverters summary" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to fetch inverters summary" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }

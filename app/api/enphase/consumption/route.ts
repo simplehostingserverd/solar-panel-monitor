@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { createEnphaseAPI } from "@/lib/api/enphase-helper"
+import { isAxiosError } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,11 +27,11 @@ export async function GET(request: NextRequest) {
     )
 
     return NextResponse.json(consumption)
-  } catch (error: any) {
-    console.error("Consumption API error:", error.response?.data || error.message)
+  } catch (error) {
+    console.error("Consumption API error:", isAxiosError(error) ? (error.response?.data || error.message) : error)
     return NextResponse.json(
-      { error: error.response?.data || "Failed to fetch consumption data" },
-      { status: error.response?.status || 500 }
+      { error: isAxiosError(error) ? error.response?.data : "Failed to fetch consumption data" },
+      { status: isAxiosError(error) ? (error.response?.status || 500) : 500 }
     )
   }
 }
